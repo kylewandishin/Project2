@@ -1,0 +1,5 @@
+character name|stamina|gold|candies
+Toffee_Todd|200|20|Frosty Fizz,Toxic Taffy,Bubblegum Blast,Caramel Comet,Lucky Licorice
+JellyBean_Jane|100|50|Breezy Butterscotch,Lucky Licorice,Fearsome Fudge,Crimson Crystal
+goopy|1|1|no,no,no,no,no,no
+joke|100|1000|none
