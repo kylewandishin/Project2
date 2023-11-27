@@ -1,14 +1,43 @@
 #include "./../../include/board.h"
+#include "./../../include/player.h"
+#include "./../../include/store.h"
+#include <cstdlib>
+#include <ctime>
+#include <sstream>
+#include <iomanip>
 
-Board::Board()
-{
-    resetBoard();
+vector<Candy> randomSample(vector<Candy> arr) {
+    srand(static_cast<unsigned int>(time(nullptr)));
+    
+    for (int i = arr.size() - 1; i > 0; --i) { // shuffle arr vector
+        int j = rand() % (i + 1);
+        swap(arr[i], arr[j]);
+    }
+    
+    int sampleSize = rand() % 6 + 5; // 5 to 10 for stock of the store
+
+    vector<Candy> result;
+    // sample of shuffled vector
+    for (int i = 0; i < sampleSize && i < arr.size(); ++i) {
+        result.push_back(arr[i]);
+    }
+
+    return result;
 }
 
-void Board::resetBoard()
+Board::Board(int players, vector<Candy> inv)
+{
+    for (int i = 0; i < players; i++)
+        _player_positions.push_back(0);
+    
+    resetBoard(inv);
+}
+
+void Board::resetBoard(vector<Candy> inv)
 {
     const int COLOR_COUNT = 3;
     const string COLORS[COLOR_COUNT] = {MAGENTA, GREEN, BLUE};
+    vector<string> storeNames = {"The Gumdrop Tavern","The Bubblegum Cafe", "The Gummy Cave"};
     Tile new_tile;
     string current_color;
     for (int i = 0; i < _BOARD_SIZE - 1; i++)
@@ -25,30 +54,63 @@ void Board::resetBoard()
     {
         _candy_store_position[i] = -1;
     }
-
-    _player_position = 0;
+    int storePosition;
+    string storeName;
+    srand(static_cast<unsigned int>(std::time(nullptr)));
+    for (int i = 0; i < 3; i++){
+        storePosition = (rand()%9 + 9*i)*3; // random number 0-8 then multiply by 3 to get 0,3,6,9,...,24 for a magenta tile
+        addCandyStore(storePosition, storeName, randomSample(inv));
+        storeNames.erase(remove(storeNames.begin(), storeNames.end(), storeName), storeNames.end());
+    }
+    int tilePos; 
+    
+    for (int i = 0; i < rand()%3; i++){
+        tilePos = rand()%(_BOARD_SIZE-5);
+        _tiles[tilePos].tile_type = "gumdrop forest";
+    }
+    for (int i = 0; i < rand()%3; i++){
+        tilePos = rand()%(_BOARD_SIZE-5);
+        _tiles[tilePos].tile_type = "gingerbread house";
+    }
+    for (int i = 0; i < rand()%3; i++){
+        tilePos = rand()%(_BOARD_SIZE-5);
+        _tiles[tilePos].tile_type = "ice cream stop";
+    } 
+    for (int i = 0; i < rand()%3; i++){
+        tilePos = rand()%(_BOARD_SIZE-5);
+        _tiles[tilePos].tile_type = "shortcut" + to_string((rand()%3)+4);
+    }
 }
-
-void Board::displayTile(int position)
+ 
+void Board::displayTile(int position, ostream& out)
 {
-    if (position < 0 || position >= _BOARD_SIZE)
-    {
-        return;
-    }
     Tile target = _tiles[position];
-    cout << target.color << " ";
-    if (position == _player_position)
-    {
-        cout << "X";
+
+    int numPlayers = _player_positions.size(), pOnT = 0;
+    vector<int> pOnTNum;
+    for (int i = 0; i < numPlayers; i++){
+        if (_player_positions[i] == position){
+            pOnT++;
+            pOnTNum.push_back(i+1);
+        }
     }
+    out << target.color;
+    if (pOnT == numPlayers)
+        out << "all";
+    else if (pOnT == 0)
+        out << "   ";
+    else if (pOnT == 1)
+        out << " " << pOnTNum[0] << " ";
+    else if (pOnT == 2)
+        out << pOnTNum[0] << " " << pOnTNum[1];
+    else if (pOnT == 3)
+        out << pOnTNum[0] << pOnTNum[1] << pOnTNum[2];
     else
-    {
-        cout << " ";
-    }
-    cout << " " << RESET;
+        out << "all";
+    out<< RESET;
 }
 
-void Board::displayBoard()
+void Board::displayBoard(ostream& out)
 {
     int segmentSize = 24;  // Adjust the size of each horizontal segment as needed
     int side = 2;
@@ -59,44 +121,77 @@ void Board::displayBoard()
         side++;
         shift = (side%2 == 1 ? 23 : 0);
         for (int i = (side%2==1 ? 0 : segmentSize); (side%2==1 ? i < segmentSize : i > 0); (side%2==1 ? i++ : i--))
-            displayTile(row*29 + i + (side%2==1 ? 0 : -1));      
-        cout << endl;
+            displayTile(row*29 + i + (side%2==1 ? 0 : -1),out);      
+        out << endl;
         for (int k = 0; k < 5; k++){
             for (int j = 0; j<=shift-1; j++){
-                cout << "   ";
+                out << "   ";
             }
-            displayTile(row*29 + 24 + k);
-            cout << endl;
+            displayTile(row*29 + 24 + k, out);
+            out << endl;
         }
     }
     if (side%2 == 1){
         if (lastRow < 24){           
             for (int i = 0; i < 22-lastRow+1; i++){
-                cout << "   ";
+                out << "   ";
             }
-            cout << ORANGE << "Castle" << RESET;
+            out << ORANGE << "Castle" << RESET;
             for (int i = lastRow; i > 1; i--){
-                displayTile(_BOARD_SIZE-lastRow+i-1);
+                displayTile(_BOARD_SIZE-lastRow+i-1,out);
             } 
         }
     }else{
         for (int i = 0; i < lastRow-1; i++){
-            displayTile(_BOARD_SIZE-lastRow+i);
+            displayTile(_BOARD_SIZE-lastRow+i,out);
         }
-        cout << ORANGE << "Castle" << RESET;
+        out << ORANGE << "Castle" << RESET;
     }
-    cout << endl;  
+    out << endl;  
    
 }
 
-bool Board::setPlayerPosition(int new_position)
+int Board::setPlayerPosition(int index, int new_position)
 {
-    if (new_position >= 0 && new_position < _BOARD_SIZE)
+    if (new_position >= 0 && new_position < _BOARD_SIZE-1)
     {
-        _player_position = new_position;
-        return true;
+        _player_positions[index] = new_position;
+        Tile t = _tiles[new_position];
+        if (t.tile_type != "regular tile"){
+            istringstream iss((string)t.tile_type);
+            string type;
+            iss >> type;
+            printf("Something is happening... you landed on a %s tile\n", type.c_str());
+            if (type == "shortcut"){   
+                printf("you were sent forward 4 spaces.\n");
+                int extra;
+                iss>>extra;
+                _player_positions[index] = new_position+extra;
+                return 1;
+            }
+            else if (type == "ice cream stop"){   
+                _player_positions[index] = new_position;
+                return 2;
+            }
+            else if (type == "gumdrop forest"){   
+                printf("you were sent back 4 spaces.\n");
+                if (new_position < 4)
+                    _player_positions[index] = 0;
+                else{
+                    _player_positions[index] = new_position-4;
+                }
+                return 3;   
+            }
+            else if (type == "gingerbread house"){   
+                printf("you were sent back to your old position.\n");
+                return 4;       
+            }
+        }
+        _player_positions[index] = new_position;
+        return 1;    
     }
-    return false;
+    _player_positions[index] = _BOARD_SIZE-1;
+    return 0;
 }
 
 int Board::getBoardSize() const
@@ -104,46 +199,54 @@ int Board::getBoardSize() const
     return _BOARD_SIZE;
 }
 
-int Board::getCandyStoreCount() const
+int Board::getCandyStoreCount()
 {
     return _candy_store_count;
 }
 
-int Board::getPlayerPosition() const
+int Board::getPlayerPosition(int index)
 {
-    return _player_position;
+    return _player_positions[index];
+}
+vector<int> Board::getPlayerPositions()
+{
+    return _player_positions;
 }
 
-bool Board::addCandyStore(int position)
+bool Board::addCandyStore(int position, string name, vector<Candy> inv)
 {
     if (_candy_store_count >= _MAX_CANDY_STORE)
     {
         return false;
     }
     _candy_store_position[_candy_store_count] = position;
+    _candy_stores[_candy_store_count] = Store(inv,name);
     _candy_store_count++;
     return true;
 }
+void Board::visitCandyStore(int index, Player& player){
+    _candy_stores[index].visitStore(player);
+}
 
-bool Board::isPositionCandyStore(int board_position)
+int Board::isPositionCandyStore(int board_position)
 {
     for (int i = 0; i < _candy_store_count; i++)
     {
         if (_candy_store_position[i] == board_position)
         {
-            return true;
+            return i;
         }
     }
-    return false;
+    return -1;
 }
 
-bool Board::movePlayer(int tile_to_move_forward)
+bool Board::movePlayer(int index,int tile_to_move_forward)
 {
-    int new_player_position = tile_to_move_forward + _player_position;
+    int new_player_position = tile_to_move_forward + _player_positions[index];
     if (new_player_position < 0 || new_player_position >= _BOARD_SIZE)
     {
         return false;
     }
-    _player_position = new_player_position;
+    _player_positions[index] = new_player_position;
     return true;
 }

@@ -2,6 +2,7 @@
 #define CANDY_H
 
 #include <string>
+#include "colours.h"
 
 using namespace std;
 
@@ -18,12 +19,12 @@ public:
     void printCandy()
     {
         printf(
-            "Name: %s\n"
-            "Description: %s\n"
-            "Effect: %s\n"
-            "Effect Value: %d\n"
-            "Candy Type: %s\n"
-            "Price: %d\n"
+            MAGENTA_FG "Name: " RESET "%s\n"
+            CYAN_FG "Description: " RESET "%s\n"
+            GREEN_FG "Effect: " RESET "%s\n"
+            GOLD_FG "Effect Value: " RESET "%d\n"
+            ORANGE_FG"Candy Type: " RESET "%s\n"
+            RED_FG"Price: " RESET "%d\n"
             ,name.c_str()
             ,description.c_str()
             ,effectType.c_str()

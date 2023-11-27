@@ -2,17 +2,12 @@
 #define BOARD_H
 
 #include "candy.h"
+#include "store.h"
+#include "colours.h"
+#include "player.h"
 #include <iostream>
 #include <vector>
 #include <climits>
-
-#define RED "\033[;41m"     /* Red */
-#define GREEN "\033[;42m"   /* Green */
-#define BLUE "\033[;44m"    /* Blue */
-#define MAGENTA "\033[;45m" /* Magenta */
-#define CYAN "\033[;46m"    /* Cyan */
-#define ORANGE "\033[48;2;230;115;0m"  /* Orange (230,115,0)*/
-#define RESET "\033[0m"
 
 using namespace std;
 
@@ -26,30 +21,37 @@ struct Tile
 class Board
 {
 private:
-    const static int _BOARD_SIZE = 86;
+    const static int _BOARD_SIZE = 120;
     Tile _tiles[_BOARD_SIZE];
     const static int _MAX_CANDY_STORE = 3;
     int _candy_store_position[_MAX_CANDY_STORE];
+    Store _candy_stores[_MAX_CANDY_STORE];
     int _candy_store_count;
-    int _player_position;
+    vector<int> _player_positions;
 
 public:
-    Board();
+    // Board(int);
+    Board(int, vector<Candy>);
 
-    void resetBoard();
-    void displayTile(int);
-    void displayBoard();
+    // void resetBoard();
+    void resetBoard(vector<Candy>);
+    Tile getTiles();
+    void displayTile(int, ostream& out = std::cout);
+    void displayBoard(ostream& out = std::cout);
 
-    bool setPlayerPosition(int);
+    int setPlayerPosition(int,int);
 
     int getBoardSize() const;
-    int getCandyStoreCount() const;
-    int getPlayerPosition() const;
+    int getCandyStoreCount();
+    int getPlayerPosition(int);
+    vector<int> getPlayerPositions();
 
-    bool addCandyStore(int);
-    bool isPositionCandyStore(int); 
+    bool addCandyStore(int position, string name, vector<Candy> inv);
+    int isPositionCandyStore(int); 
+    void visitCandyStore(int index, Player& player);
 
-    bool movePlayer(int tile_to_move_forward);
+    bool movePlayer(int index, int tile_to_move_forward);
+
 };
 
 #endif

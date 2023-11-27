@@ -7,7 +7,7 @@
 class Player
 {
 private:
-    static const int _MAX_CANDY_AMOUNT = 4;
+    static const int _MAX_CANDY_AMOUNT = 9;
     std::string _name;
     int _stamina;
     double _gold;
@@ -15,6 +15,7 @@ private:
     vector<Candy> _inventory;
     int _candy_amount;
     std::string _nickname;
+    bool _immune = false;
 
 public:
     Player();
@@ -31,11 +32,21 @@ public:
     void setEffect(std::string effect);
     std::string getEffect();
     void printInventory();
+    void printInventory(ostream& out);
     Candy findCandy(std::string candy_name);
     bool addCandy(Candy candy);
     bool removeCandy(std::string candy_name);
+    bool removeCandyByType(std::string candy_type);
     bool hasNoCandy();
+    bool hasMaxCandy();
     void printPlayer();
+    void printPlayer(ostream& out);
+    void useCandy(Candy);
+    void setImmune(bool);
+    bool getImmune();
+    vector<Candy> getInventory();
+    vector<Candy> getUInventory();
+    int skipTurns = 0;
 };
 
 #endif
