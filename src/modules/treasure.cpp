@@ -74,6 +74,28 @@ void candyAquisition(Player& player){
     return;
 }
 
+bool playRPS() {
+    char p1, p2;
+    const char options[3] = {'r','p','s'};
+    int i = 0;
+    string empty;
+    do {
+        printf((i == 0 ? "Enter r, p, or s\n" : "Invalid selection!\n"));
+        std::cin >> p1;
+        getline(cin,empty);
+        i++;
+    } while (p1 != 'r' && p1 != 'p' && p1 != 's');
+    p2 = options[rand()%3];
+    if (p1 == p2) {
+        printf("Tie! Play again\n");
+        return playRPS();
+    }
+    if ((p1 == 'r' && p2 == 's') || (p1 == 's' && p2 == 'p') || (p1 == 'p' && p2 == 'r')) {
+        return true;
+    }
+    return false;
+}
+
 void Treasure::visitTreasure(Player& player)
 {
     Riddle rid = _riddles[rand()%(int)_riddles.size()];

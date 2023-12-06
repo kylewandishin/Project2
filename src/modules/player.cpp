@@ -54,8 +54,8 @@ int Player::getStamina() {
 }
 
 void Player::setGold(double gold) {
-    if (gold >100)
-        _gold = 100;
+    if (gold >1000)
+        _gold = 1000;
     else if (gold<0)
         _gold = 0;
     else
@@ -253,7 +253,6 @@ vector<Candy> Player::getUInventory(){
 
 
 void Player::useCandy(Candy candy){
-    removeCandy(candy.name);
     if (candy.candy_type == "gummy"){
         skipTurns-=candy.effectValue;
     }else if (candy.candy_type == "magical" || candy.candy_type == "poison"){

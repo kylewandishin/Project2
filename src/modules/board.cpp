@@ -56,14 +56,17 @@ void Board::resetBoard(vector<Candy> inv)
     }
     int storePosition;
     string storeName;
+
+    // |generate store positions
     srand(static_cast<unsigned int>(std::time(nullptr)));
     for (int i = 0; i < 3; i++){
         storePosition = (rand()%9 + 9*i)*3; // random number 0-8 then multiply by 3 to get 0,3,6,9,...,24 for a magenta tile
         addCandyStore(storePosition, storeName, randomSample(inv));
         storeNames.erase(remove(storeNames.begin(), storeNames.end(), storeName), storeNames.end());
     }
+
+    // |special tiles
     int tilePos; 
-    
     for (int i = 0; i < rand()%3; i++){
         tilePos = rand()%(_BOARD_SIZE-5);
         _tiles[tilePos].tile_type = "gumdrop forest";
@@ -76,9 +79,13 @@ void Board::resetBoard(vector<Candy> inv)
         tilePos = rand()%(_BOARD_SIZE-5);
         _tiles[tilePos].tile_type = "ice cream stop";
     } 
-    for (int i = 0; i < rand()%3; i++){
+    for (int i = 0; i < rand()%8; i++){
         tilePos = rand()%(_BOARD_SIZE-5);
         _tiles[tilePos].tile_type = "shortcut" + to_string((rand()%3)+4);
+    }
+    for (int i = 0; i < rand()%10; i++){
+        tilePos = rand()%(_BOARD_SIZE-5);
+        _tiles[tilePos].tile_type = "treasure";
     }
 }
  
@@ -155,6 +162,7 @@ int Board::setPlayerPosition(int index, int new_position)
 {
     if (new_position >= 0 && new_position < _BOARD_SIZE-1)
     {
+        int curPos = _player_positions[index];
         _player_positions[index] = new_position;
         Tile t = _tiles[new_position];
         if (t.tile_type != "regular tile"){
@@ -170,7 +178,6 @@ int Board::setPlayerPosition(int index, int new_position)
                 return 1;
             }
             else if (type == "ice cream stop"){   
-                _player_positions[index] = new_position;
                 return 2;
             }
             else if (type == "gumdrop forest"){   
@@ -184,7 +191,12 @@ int Board::setPlayerPosition(int index, int new_position)
             }
             else if (type == "gingerbread house"){   
                 printf("you were sent back to your old position.\n");
+                _player_positions[index] = curPos;
                 return 4;       
+            }
+            else if (type == "treasure"){   
+                printf("you landed on a treasure.\n");
+                return 5;       
             }
         }
         _player_positions[index] = new_position;

@@ -1,7 +1,7 @@
 #include "./../include/board.h"
 #include "./../include/player.h"
 #include "./../include/store.h"
-#include "./../include/riddle.h"
+#include "./../include/treasure.h"
 #include <iostream>
 #include <vector>
 #include <sstream>
@@ -10,7 +10,7 @@
 #include <ctime>
 #include <filesystem>
 
-namespace fs = filesystem;
+namespace fs = filesystem; // set up a filesystem handler
 using namespace std;
 
 struct Card
@@ -22,12 +22,12 @@ struct Card
 vector<Candy> getCandy(string file_name, vector<Candy> candies);
 void getRiddles(string file_name, vector<Riddle> &riddles);
 vector<Player> getPlayers(string file_name, vector<Player> players, vector<Candy> avalCandies);
-
+int playCalamity(Player& player);
 string getOutFileName();
 int getIntInput(string prompt);
 string getStrInput(string prompt);
 char getCharInput(string prompt);
-bool takeTurn(vector<Player> &, int, Board &);
+int takeTurn(vector<Player> &, int, Board &);
 
 int main()
 {
@@ -97,11 +97,17 @@ int main()
     board.displayBoard();
     string outFilePath = getOutFileName();
     ofstream outfile(outFilePath);
-    int turnNo = 1;
+    int turnNo = 1, result_of_turn;
+    Treasure treasureManager = Treasure(riddles, avalCandies);
     while (true)
-    {
-        if (takeTurn(players, (numPlayers > 1 ? i % numPlayers : 0), board))
+    {   
+        result_of_turn = takeTurn(players, (numPlayers > 1 ? i % numPlayers : 0), board);
+        if (result_of_turn == 1)
             i++;
+        else if (result_of_turn == 2){
+            treasureManager.visitTreasure(players[numPlayers > 1 ? i % numPlayers : 0]);
+            i++;
+        }
         else
             break;
         outfile << "--------------------------------------------------------------------------\n";
@@ -177,14 +183,14 @@ char getCharInput(string prompt)
 }
 
 // GAME MOVE ON
-bool takeTurn(vector<Player> &players, int playerNum, Board &b)
+int takeTurn(vector<Player> &players, int playerNum, Board &b)
 {
     Player &player = players[playerNum];
-    if (player.skipTurns < 0)
+    if (player.skipTurns > 0)
     {
-        player.skipTurns += 1;
-        printf("your turn was skipped, only %d more turns to go.\n", (-player.skipTurns));
-        return true;
+        player.skipTurns -= 1;
+        printf("your turn was skipped, only %d more turns to go.\n", (player.skipTurns));
+        return 1;
     }
     const string colours[] = {MAGENTA, GREEN, BLUE};
     const string colours_txt[] = {"Magenta", "Green", "Blue"};
@@ -257,7 +263,7 @@ bool takeTurn(vector<Player> &players, int playerNum, Board &b)
         {
             b.displayBoard();
             printf("%s has won! thank you for playing candy land.\n", player.getNickName().c_str());
-            return false;
+            return 0;
         }
         else if (resultOfSetPos == 2)
         {
@@ -283,6 +289,9 @@ bool takeTurn(vector<Player> &players, int playerNum, Board &b)
             }
         }
         b.displayBoard();
+        if (resultOfSetPos == 5){
+            return 2;
+        }
         int indexOfStore = b.isPositionCandyStore(newPos);
         if (indexOfStore != -1)
         {
@@ -299,6 +308,12 @@ bool takeTurn(vector<Player> &players, int playerNum, Board &b)
                 b.visitCandyStore(indexOfStore, player);
             }
         }
+
+        int doCalamity = rand()%100;
+        if (doCalamity<40){
+            playCalamity(player);
+        }
+
         if (drawAgain == 'y')
             return takeTurn(players, playerNum, b);
     }
@@ -338,19 +353,21 @@ bool takeTurn(vector<Player> &players, int playerNum, Board &b)
         Player &target = players[useOnP - 1];
         printf("candy target\n");
         target.useCandy(candy);
+        player.removeCandy(candy.name);
     }
     else
     {
         player.printPlayer();
     }
-    return true;
+    return 1;
 }
 
 // FILE READING
 vector<Player> getPlayers(
     string file_name,
     vector<Player> players,
-    vector<Candy> avalCandies)
+    vector<Candy> avalCandies
+    )
 {
     ifstream file(file_name);
     if (!file.is_open())
@@ -437,5 +454,61 @@ void getRiddles(string file_name, vector<Riddle> &riddles)
         getline(iss, answer);
         riddles.push_back({line, answer});
     }
-    printf("hello\n");
 }
+
+bool playRPSmain() {
+    char p1, p2;
+    const char options[3] = {'r','p','s'};
+    int i = 0;
+    string empty;
+    do {
+        printf((i == 0 ? "Enter r, p, or s\n" : "Invalid selection!\n"));
+        std::cin >> p1;
+        getline(cin,empty);
+        i++;
+    } while (p1 != 'r' && p1 != 'p' && p1 != 's');
+    p2 = options[rand()%3];
+    if (p1 == p2) {
+        printf("Tie! Play again\n");
+        return playRPSmain();
+    }
+    if ((p1 == 'r' && p2 == 's') || (p1 == 's' && p2 == 'p') || (p1 == 'p' && p2 == 'r')) {
+        return true;
+    }
+    return false;
+}
+
+int playCalamity(Player& player){
+            srand(time(0));
+            int r = rand()%100;
+            if (r<30){
+                int lost = (rand()%6+5);
+                printf("Oh no! Candy Bandits have swiped your gold coins! you lost %d gold\n", lost);
+                player.setGold(player.getGold()-lost);
+            }else if (r < 60){
+                printf("You have gotten lost, you lost a turn. however you have a chance to get a map if you win this game.\n");
+                if (playRPSmain()){
+                    printf("congratulations.\n");
+                } else{
+                    printf("womp womp!\n");
+                    player.skipTurns+=1;
+                }            
+            }else if (r < 90){
+                printf("congratulations, you landed on a gumdrop recharge. your stamina and gold were refilled.\n");
+                player.setGold(1000);
+                player.setStamina(100);
+            }else if (r < 99){
+                printf("you have stumbled onto a cliff, if you fall you will lost half of your gold and stamina\n");
+                if (!playRPSmain()){
+                    printf("womp womp!\n");
+                    player.setGold(player.getGold()/2);
+                    player.setStamina(player.getStamina()/2);
+                }else{
+                    printf("good job! you made it across\n");
+                }
+            }else{
+                printf("something big is happening... you begin floating and flying toward the castle.\n");
+                return 1;
+            }
+            return 0;
+        }

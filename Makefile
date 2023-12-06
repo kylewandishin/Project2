@@ -1,16 +1,8 @@
-MODULES = $(wildcard ./src/modules/*.cpp)
+MODULES=$(wildcard ./src/modules/*.cpp)
 
-build:
+builder:
+	rm -f ./build/*
 	g++ -Wall -Werror -Wpedantic -std=c++17 ./src/main.cpp $(MODULES) -o ./build/CandyLand
 
-run: build
-	ifeq ($(OS),Windows_NT)
-		./build/CandyLand.exe
-	else
-		./build/CandyLand
-	endif
-
-clean:
-	rm -rf ./build
-
-.PHONY: all clean
+run: builder
+	./build/CandyLand
