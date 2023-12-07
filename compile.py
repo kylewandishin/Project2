@@ -1,6 +1,11 @@
 import os
 import sys
 
+directory = './build'
+
+if not os.path.exists(directory):
+    os.makedirs(directory)
+
 args = sys.argv
 file_path = os.path.abspath(__file__)
 valid = {

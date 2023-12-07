@@ -542,17 +542,21 @@ int playCalamity(Player &player)
 
 bool ensureAllDirs()
 {
-    const string dirnames[2] = {"./logs"};//, "../build"};
+    const string dirnames[1] = {"./logs"};//, "../build"};
     for (string dirname : dirnames){
-        if (!fs::exists(dirname)) {
-            if (fs::create_directory(dirname)) {
-                printf("Directory {%s} created successfully\n", dirname.c_str());
+        try{
+            if (!fs::exists(dirname)) {
+                if (fs::create_directory(dirname)) {
+                    printf("Directory {%s} created successfully\n", dirname.c_str());
+                } else {
+                    cerr << "Failed to create directory" << "{" << dirname << "}" << endl;
+                    return false; // Return an error code
+                }
             } else {
-                cerr << "Failed to create directory" << "{" << dirname << "}" << endl;
-                return false; // Return an error code
+                printf("Directory {%s} already exists\n", dirname.c_str());
             }
-        } else {
-            printf("Directory {%s} already exists\n", dirname.c_str());
+        }catch(...){
+            cout << dirname << "|" <<endl;
         }
     }
     return true;
