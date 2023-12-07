@@ -12,6 +12,18 @@
 
 namespace fs = filesystem; // set up a filesystem handler
 using namespace std;
+void printStart(){
+    fstream file("./assets/intro.txt");
+    string line;
+    while (getline(file, line))
+        cout << line << endl;
+}
+void printEnd(){
+    fstream file("./assets/end.txt");
+    string line;
+    while (getline(file, line))
+        cout << line << endl;
+}
 
 struct Card
 {
@@ -36,6 +48,7 @@ int main()
         printf("something in your filesystem is very broken\nplease fix this error before retrying\n");
         return 0;
     }
+    printStart();
     srand(static_cast<unsigned int>(time(nullptr)));
     vector<Candy> avalCandies;
     vector<Riddle> riddles;
@@ -127,6 +140,7 @@ int main()
     outfile << "game has ended\nfinal stats:\n\n";
     for (Player p : players)
         p.printPlayer(outfile);
+    printEnd();
     return 0;
 }
 
@@ -319,7 +333,11 @@ int takeTurn(vector<Player> &players, int playerNum, Board &b)
         int doCalamity = rand() % 100;
         if (doCalamity < 40)
         {
-            playCalamity(player);
+            if(playCalamity(player)==1){
+                b.displayBoard();
+                printf("%s has won! thank you for playing candy land.\n", player.getNickName().c_str());
+                return 0;
+            }
         }
 
         if (drawAgain == 'y')

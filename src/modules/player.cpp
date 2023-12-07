@@ -12,7 +12,7 @@ Player::Player() :  _name(""), _stamina(0), _gold(0.0), _effect(""), _candy_amou
     }
 }
 
-Player::Player(string name,int stamina, double gold, std::string effect, vector<Candy> candy_array)
+Player::Player(string name,int stamina, double gold, string effect, vector<Candy> candy_array)
     : _name(name),_stamina(stamina), _gold(gold), _effect(effect), _candy_amount(0) {
     for (size_t i = 0; i < candy_array.size(); i++){
         _inventory.push_back(candy_array[i]);
@@ -24,7 +24,7 @@ int Player::getCandyAmount() {
     return _candy_amount;
 }
 
-void Player::setName(std::string name){
+void Player::setName(string name){
     _name = name;
 }
     
@@ -32,19 +32,21 @@ string Player::getName(){
     return _name;
 }
 
-void Player::setNickName(std::string nickName){
+void Player::setNickName(string nickName){
     _nickname = nickName;
 }
 
-std::string Player::getNickName(){
+string Player::getNickName(){
     return _nickname;
 }
 
 void Player::setStamina(int stamina) {
     if (stamina >100)
         _stamina = 100;
-    else if (stamina<0)
+    else if (stamina<0){
         _stamina = 0;
+        skipTurns+=2;
+    }
     else
         _stamina = stamina;
 }
@@ -74,17 +76,17 @@ bool Player::getImmune(){
     return _immune;
 }
 
-void Player::setEffect(std::string effect) {
+void Player::setEffect(string effect) {
     _effect = effect;
 }
 
-std::string Player::getEffect() {
+string Player::getEffect() {
     return _effect;
 }
 
 void Player::printInventory() {
     for (int i = 0; i < (int)_inventory.size(); i++){
-        std::cout << "[" << _inventory[i].name << "] ";
+        cout << "[" << _inventory[i].name << "] ";
         if ((i+1)%3==0)
             printf("\n");
     }
@@ -105,14 +107,14 @@ bool Player::hasNoCandy() {
     return _candy_amount == 0;
 }
 
-Candy Player::findCandy(std::string candy_name) {
+Candy Player::findCandy(string candy_name) {
     bool isEqual;
     for (int i = 0; i < _candy_amount; i++) {
         isEqual = false;
         if (candy_name.size() == _inventory[i].name.size()){
             isEqual = true;
             for (size_t j = 0; j < candy_name.size(); ++j) {
-                if (std::tolower(candy_name[j]) != std::tolower(_inventory[i].name[j])) {
+                if (tolower(candy_name[j]) != tolower(_inventory[i].name[j])) {
                     isEqual = false;
                 }
             }
@@ -149,7 +151,7 @@ bool Player::addCandy(Candy candy) {
     _candy_amount++;
     return true;
 }
-bool Player::removeCandyByType(std::string candy_type){
+bool Player::removeCandyByType(string candy_type){
     bool isEqual;
     vector<string> worked;
     for (int i = 0; i < (int)_inventory.size(); i++) {
@@ -157,7 +159,7 @@ bool Player::removeCandyByType(std::string candy_type){
         if (candy_type.size() == _inventory[i].candy_type.size()){
             isEqual = true;
             for (size_t j = 0; j < candy_type.size(); ++j) {
-                if (std::tolower(candy_type[j]) != std::tolower(_inventory[i].candy_type[j])) {
+                if (tolower(candy_type[j]) != tolower(_inventory[i].candy_type[j])) {
                     isEqual = false;
                 }
             }
@@ -170,14 +172,14 @@ bool Player::removeCandyByType(std::string candy_type){
     return false;
 }
 
-bool Player::removeCandy(std::string candy_name) {
+bool Player::removeCandy(string candy_name) {
     bool isEqual;
     for (int i = 0; i < (int)_inventory.size(); i++) {
         isEqual = false;
         if (candy_name.size() == _inventory[i].name.size()){
             isEqual = true;
             for (size_t j = 0; j < candy_name.size(); ++j) {
-                if (std::tolower(candy_name[j]) != std::tolower(_inventory[i].name[j])) {
+                if (tolower(candy_name[j]) != tolower(_inventory[i].name[j])) {
                     isEqual = false;
                 }
             }
@@ -195,9 +197,9 @@ bool Player::removeCandy(std::string candy_name) {
     return false;
 }
 
-std::string RAINBOW(const std::string& input) {
-    const std::string colors[] = {RED_FG, GREEN_FG, YELLOW_FG, BLUE_FG, MAGENTA_FG, CYAN_FG};
-    std::string rainbow_str;
+string RAINBOW(const string& input) {
+    const string colors[] = {RED_FG, GREEN_FG, YELLOW_FG, BLUE_FG, MAGENTA_FG, CYAN_FG};
+    string rainbow_str;
     size_t color_index = 0;
 
     for (size_t i = 0; i < input.length(); ++i) {

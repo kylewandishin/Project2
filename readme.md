@@ -1,4 +1,5 @@
 # Project 2
+## <span style="color:#C5595D; font-size;64px;">**Warning! if you do not use one of the provided compilation method. you must ensure you are putting the executable in a folder ("./anyFolder/executable"). if you do not do this the logs folder will be created and filled in the relative path "./../"**</span>
 
 ## Table of Contents
 
