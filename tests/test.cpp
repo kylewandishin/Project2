@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-
+// sample stream listener to tap into cout << to record all content going to cout and write it to a logfile
 class StreamListener : public std::streambuf {
 public:
     StreamListener(std::ostream& original, std::ostream& capture)
