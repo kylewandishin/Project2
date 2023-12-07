@@ -14,7 +14,8 @@ run = False
 if len(args)>1:
     args = args[1:]
     if not args[0] in validarr:
-        print(f"sorry, the argument {args[0]} is not supprted")
+        print("{}".format(args[0]))
+        print("sorry, the argument {} is not supported".format(args[0]))
         args[0] = "-h"
     arg = valid.get(args[0]) if valid.get(args[0])!=None else args[0]
     if arg == "-h":
@@ -28,7 +29,7 @@ if len(args)>1:
 
 module_files = [os.path.join("./src/modules", file) for file in os.listdir('./src/modules') if file.endswith(".cpp")]
 
-compile_command = f"g++ -Wall -Werror -Wpedantic -std=c++17 ./src/main.cpp {' '.join(module_files)} -o ./build/CandyLand"
+compile_command = "g++ -Wall -Werror -Wpedantic -std=c++17 ./src/main.cpp {} -o ./build/CandyLand".format(' '.join(module_files))
 os.system(compile_command)
 if run:
     if os.name == "nt":

@@ -22,8 +22,9 @@ struct Card
 vector<Candy> getCandy(string file_name, vector<Candy> candies);
 void getRiddles(string file_name, vector<Riddle> &riddles);
 vector<Player> getPlayers(string file_name, vector<Player> players, vector<Candy> avalCandies);
-int playCalamity(Player& player);
+int playCalamity(Player &player);
 string getOutFileName();
+bool ensureAllDirs();
 int getIntInput(string prompt);
 string getStrInput(string prompt);
 char getCharInput(string prompt);
@@ -31,6 +32,10 @@ int takeTurn(vector<Player> &, int, Board &);
 
 int main()
 {
+    if (!ensureAllDirs()){
+        printf("something in your filesystem is very broken\nplease fix this error before retrying\n");
+        return 0;
+    }
     srand(static_cast<unsigned int>(time(nullptr)));
     vector<Candy> avalCandies;
     vector<Riddle> riddles;
@@ -100,11 +105,12 @@ int main()
     int turnNo = 1, result_of_turn;
     Treasure treasureManager = Treasure(riddles, avalCandies);
     while (true)
-    {   
+    {
         result_of_turn = takeTurn(players, (numPlayers > 1 ? i % numPlayers : 0), board);
         if (result_of_turn == 1)
             i++;
-        else if (result_of_turn == 2){
+        else if (result_of_turn == 2)
+        {
             treasureManager.visitTreasure(players[numPlayers > 1 ? i % numPlayers : 0]);
             i++;
         }
@@ -289,7 +295,8 @@ int takeTurn(vector<Player> &players, int playerNum, Board &b)
             }
         }
         b.displayBoard();
-        if (resultOfSetPos == 5){
+        if (resultOfSetPos == 5)
+        {
             return 2;
         }
         int indexOfStore = b.isPositionCandyStore(newPos);
@@ -309,8 +316,9 @@ int takeTurn(vector<Player> &players, int playerNum, Board &b)
             }
         }
 
-        int doCalamity = rand()%100;
-        if (doCalamity<40){
+        int doCalamity = rand() % 100;
+        if (doCalamity < 40)
+        {
             playCalamity(player);
         }
 
@@ -366,8 +374,7 @@ int takeTurn(vector<Player> &players, int playerNum, Board &b)
 vector<Player> getPlayers(
     string file_name,
     vector<Player> players,
-    vector<Candy> avalCandies
-    )
+    vector<Candy> avalCandies)
 {
     ifstream file(file_name);
     if (!file.is_open())
@@ -456,59 +463,97 @@ void getRiddles(string file_name, vector<Riddle> &riddles)
     }
 }
 
-bool playRPSmain() {
+bool playRPSmain()
+{
     char p1, p2;
-    const char options[3] = {'r','p','s'};
+    const char options[3] = {'r', 'p', 's'};
     int i = 0;
     string empty;
-    do {
+    do
+    {
         printf((i == 0 ? "Enter r, p, or s\n" : "Invalid selection!\n"));
         std::cin >> p1;
-        getline(cin,empty);
+        getline(cin, empty);
         i++;
     } while (p1 != 'r' && p1 != 'p' && p1 != 's');
-    p2 = options[rand()%3];
-    if (p1 == p2) {
+    p2 = options[rand() % 3];
+    if (p1 == p2)
+    {
         printf("Tie! Play again\n");
         return playRPSmain();
     }
-    if ((p1 == 'r' && p2 == 's') || (p1 == 's' && p2 == 'p') || (p1 == 'p' && p2 == 'r')) {
+    if ((p1 == 'r' && p2 == 's') || (p1 == 's' && p2 == 'p') || (p1 == 'p' && p2 == 'r'))
+    {
         return true;
     }
     return false;
 }
 
-int playCalamity(Player& player){
-            srand(time(0));
-            int r = rand()%100;
-            if (r<30){
-                int lost = (rand()%6+5);
-                printf("Oh no! Candy Bandits have swiped your gold coins! you lost %d gold\n", lost);
-                player.setGold(player.getGold()-lost);
-            }else if (r < 60){
-                printf("You have gotten lost, you lost a turn. however you have a chance to get a map if you win this game.\n");
-                if (playRPSmain()){
-                    printf("congratulations.\n");
-                } else{
-                    printf("womp womp!\n");
-                    player.skipTurns+=1;
-                }            
-            }else if (r < 90){
-                printf("congratulations, you landed on a gumdrop recharge. your stamina and gold were refilled.\n");
-                player.setGold(1000);
-                player.setStamina(100);
-            }else if (r < 99){
-                printf("you have stumbled onto a cliff, if you fall you will lost half of your gold and stamina\n");
-                if (!playRPSmain()){
-                    printf("womp womp!\n");
-                    player.setGold(player.getGold()/2);
-                    player.setStamina(player.getStamina()/2);
-                }else{
-                    printf("good job! you made it across\n");
-                }
-            }else{
-                printf("something big is happening... you begin floating and flying toward the castle.\n");
-                return 1;
-            }
-            return 0;
+int playCalamity(Player &player)
+{
+    srand(time(0));
+    int r = rand() % 100;
+    if (r < 30)
+    {
+        int lost = (rand() % 6 + 5);
+        printf("Oh no! Candy Bandits have swiped your gold coins! you lost %d gold\n", lost);
+        player.setGold(player.getGold() - lost);
+    }
+    else if (r < 60)
+    {
+        printf("You have gotten lost, you lost a turn. however you have a chance to get a map if you win this game.\n");
+        if (playRPSmain())
+        {
+            printf("congratulations.\n");
         }
+        else
+        {
+            printf("womp womp!\n");
+            player.skipTurns += 1;
+        }
+    }
+    else if (r < 90)
+    {
+        printf("congratulations, you landed on a gumdrop recharge. your stamina and gold were refilled.\n");
+        player.setGold(1000);
+        player.setStamina(100);
+    }
+    else if (r < 99)
+    {
+        printf("you have stumbled onto a cliff, if you fall you will lost half of your gold and stamina\n");
+        if (!playRPSmain())
+        {
+            printf("womp womp!\n");
+            player.setGold(player.getGold() / 2);
+            player.setStamina(player.getStamina() / 2);
+        }
+        else
+        {
+            printf("good job! you made it across\n");
+        }
+    }
+    else
+    {
+        printf("something big is happening... you begin floating and flying toward the castle.\n");
+        return 1;
+    }
+    return 0;
+}
+
+bool ensureAllDirs()
+{
+    const string dirnames[2] = {"./logs"};//, "../build"};
+    for (string dirname : dirnames){
+        if (!fs::exists(dirname)) {
+            if (fs::create_directory(dirname)) {
+                printf("Directory {%s} created successfully\n", dirname.c_str());
+            } else {
+                cerr << "Failed to create directory" << "{" << dirname << "}" << endl;
+                return false; // Return an error code
+            }
+        } else {
+            printf("Directory {%s} already exists\n", dirname.c_str());
+        }
+    }
+    return true;
+}
