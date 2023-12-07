@@ -12,3 +12,4 @@ Toxic Taffy|Decreases opponents stamina by 20 units|stamina|-20|poison|25
 Caramel Comet|Protects against all poison candies|other|3|immunity|25
 broken|God Mode|all|999|999|1001
 no|no|no|0|no|1001
+silly :3|God Mode|all|999|999|9999
